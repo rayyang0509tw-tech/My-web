@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Canvas Assignment Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <p class="badge">SFU Style Dashboard</p>
+        <h1>Canvas Assignment Tracker</h1>
+        <p class="subtitle">Track due dates, priorities, and live countdowns in one page.</p>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="toolbar">
+        <label for="courseFilter">Course</label>
+        <select id="courseFilter">
+          <option value="all">All Courses</option>
+        </select>
+
+        <label for="sortBy">Sort</label>
+        <select id="sortBy">
+          <option value="soonest">Due Soonest</option>
+          <option value="priority">Priority</option>
+          <option value="course">Course Name</option>
+        </select>
+      </section>
+
+      <section>
+        <h2>Upcoming Work</h2>
+        <div id="assignmentGrid" class="grid"></div>
+      </section>
+    </main>
+
+    <script src="index.js"></script>
+  </body>
+</html>
