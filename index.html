@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Command Center</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-main: #0b1f3a;
+      --bg-panel: #1a2f4d;
+      --bg-panel-soft: #263c5a;
+      --text-main: #e6edf7;
+      --text-muted: #b9c7da;
+      --accent: #4d79b3;
+      --accent-hover: #5b8ac9;
+      --danger: #c85a5a;
+      --border: #3c5270;
+      --success: #4e9c7a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(160deg, var(--bg-main), #132947);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    .menu-bar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #0e2748;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .menu-brand {
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .menu-links {
+      display: flex;
+      gap: 18px;
+    }
+
+    .menu-links a {
+      color: var(--text-main);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 6px 10px;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+    }
+
+    .menu-links a:hover,
+    .menu-links a:focus {
+      background-color: var(--bg-panel-soft);
+      outline: none;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 28px auto;
+      padding: 0 16px 24px;
+      display: grid;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    h1,
+    h2 {
+      margin-top: 0;
+      color: var(--text-main);
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-top: 0;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr 160px auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #122845;
+      color: var(--text-main);
+    }
+
+    input:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+    }
+
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background: var(--accent-hover);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 420px;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .delete-btn {
+      background: transparent;
+      color: #f2b3b3;
+      border: 1px solid #8b4a4a;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    .delete-btn:hover {
+      background: rgba(200, 90, 90, 0.2);
+    }
+
+    .empty-state {
+      color: var(--text-muted);
+      padding: 8px 0;
+    }
+
+    .about {
+      line-height: 1.5;
+    }
+
+    @media (max-width: 760px) {
+      form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="menu-bar">
+    <div class="menu-brand">Inventory Command Center</div>
+    <div class="menu-links">
+      <a href="index.html">Dashboard</a>
+      <a href="about.html">About</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section id="dashboard" class="card">
+      <h1>Warehouse Dashboard</h1>
+      <p>Track inventory items and quantities in real time.</p>
+
+      <form id="item-form" autocomplete="off">
+        <div class="field">
+          <label for="item-name">Item Name</label>
+          <input id="item-name" name="itemName" type="text" maxlength="60" required />
+        </div>
+
+        <div class="field">
+          <label for="item-qty">Quantity</label>
+          <input id="item-qty" name="quantity" type="number" min="1" required />
+        </div>
+
+        <button type="submit">Add Item</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Current Inventory</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Item Name</th>
+              <th>Quantity</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="inventory-body"></tbody>
+        </table>
+      </div>
+      <div id="empty-state" class="empty-state" hidden>No inventory items added yet.</div>
+    </section>
+
+    <section class="card">
+      <h2>Inventory Visualization</h2>
+      <canvas id="inventoryChart" height="120"></canvas>
+    </section>
+
+    <section id="about" class="card about">
+      <h2>About</h2>
+      <p>This command center helps logistics teams manage item levels and monitor stock distribution using a simple, persistent dashboard.</p>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = 'inventoryCommandCenterItems';
+
+    const form = document.getElementById('item-form');
+    const itemNameInput = document.getElementById('item-name');
+    const qtyInput = document.getElementById('item-qty');
+    const tableBody = document.getElementById('inventory-body');
+    const emptyState = document.getElementById('empty-state');
+    const chartCanvas = document.getElementById('inventoryChart');
+
+    let items = loadItems();
+    let inventoryChart = null;
+
+    function loadItems() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+          .filter((entry) => entry && typeof entry.name === 'string' && Number.isFinite(entry.quantity))
+          .map((entry) => ({
+            id: entry.id || crypto.randomUUID(),
+            name: entry.name.trim(),
+            quantity: Math.max(0, Number(entry.quantity))
+          }))
+          .filter((entry) => entry.name.length > 0 && entry.quantity > 0);
+      } catch (err) {
+        console.error('Failed to parse saved inventory:', err);
+        return [];
+      }
+    }
+
+    function saveItems() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function renderTable() {
+      tableBody.innerHTML = '';
+
+      if (items.length === 0) {
+        emptyState.hidden = false;
+        return;
+      }
+
+      emptyState.hidden = true;
+
+      items.forEach((item) => {
+        const row = document.createElement('tr');
+
+        const nameCell = document.createElement('td');
+        nameCell.textContent = item.name;
+
+        const qtyCell = document.createElement('td');
+        qtyCell.textContent = String(item.quantity);
+
+        const actionCell = document.createElement('td');
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'delete-btn';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => removeItem(item.id));
+        actionCell.appendChild(deleteButton);
+
+        row.appendChild(nameCell);
+        row.appendChild(qtyCell);
+        row.appendChild(actionCell);
+
+        tableBody.appendChild(row);
+      });
+    }
+
+    function updateChart() {
+      const labels = items.map((item) => item.name);
+      const quantities = items.map((item) => item.quantity);
+      const barColors = quantities.map((qty) =>
+        qty < 10 ? 'rgba(220, 72, 72, 0.8)' : 'rgba(93, 132, 188, 0.75)'
+      );
+      const borderColors = quantities.map((qty) =>
+        qty < 10 ? 'rgba(255, 130, 130, 1)' : 'rgba(145, 176, 220, 1)'
+      );
+
+      if (!inventoryChart) {
+        inventoryChart = new Chart(chartCanvas, {
+          type: 'bar',
+          data: {
+            labels,
+            datasets: [{
+              label: 'Quantity',
+              data: quantities,
+              backgroundColor: barColors,
+              borderColor: borderColors,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+              x: {
+                ticks: { color: '#d8e2f2' },
+                grid: { color: 'rgba(216, 226, 242, 0.1)' }
+              },
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  color: '#d8e2f2',
+                  precision: 0
+                },
+                grid: { color: 'rgba(216, 226, 242, 0.1)' }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: { color: '#d8e2f2' }
+              }
+            }
+          }
+        });
+      } else {
+        inventoryChart.data.labels = labels;
+        inventoryChart.data.datasets[0].data = quantities;
+        inventoryChart.data.datasets[0].backgroundColor = barColors;
+        inventoryChart.data.datasets[0].borderColor = borderColors;
+        inventoryChart.update();
+      }
+    }
+
+    function renderAll() {
+      renderTable();
+      updateChart();
+    }
+
+    function addItem(name, quantity) {
+      items.push({
+        id: crypto.randomUUID(),
+        name,
+        quantity
+      });
+      saveItems();
+      renderAll();
+    }
+
+    function removeItem(id) {
+      items = items.filter((item) => item.id !== id);
+      saveItems();
+      renderAll();
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+
+      const name = itemNameInput.value.trim();
+      const quantity = Number(qtyInput.value);
+
+      if (!name || !Number.isInteger(quantity) || quantity <= 0) {
+        return;
+      }
+
+      addItem(name, quantity);
+      form.reset();
+      itemNameInput.focus();
+    });
+
+    renderAll();
+  </script>
+</body>
+</html>
